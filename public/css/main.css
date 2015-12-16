@@ -1,0 +1,11 @@
+label {
+  font-size: 1em !important;
+}
+
+.form-group {
+    margin: 0;
+}
+
+legend {
+    margin-bottom: 0;
+}

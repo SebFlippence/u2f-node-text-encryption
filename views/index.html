@@ -1,73 +1,98 @@
 <!doctype html>
 <html>
-<head>
-<script src="https://demo.yubico.com/js/u2f-api.js"></script>
-</head>
-<body>
-<h1>Student Data Viewer</h1>
+	<head>
+		<title>U2F Encrypted File Store</title>
+		<meta charset="utf-8">
+		<script src="https://demo.yubico.com/js/u2f-api.js"></script>
 
-<p>Greetings! To access this feature you must add a U2F 2FA key to your account.</p>
-<input type="button" value="Register a 2FA key" onClick="register()">
+		<!-- Material Design fonts -->
+		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+		<link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-<p>If you have already added a key to your account, you can use it to access student data.</p>
-<input type="button" value="View super secret student data" onClick="authenticate()">
-<script>
-/* Get an authentication request from the server,
- * sign it with the key, verify the results on the server
- */
-function authenticate() {
-	ajaxGet("/api/sign_request", function(authRequest) {
-			var req = JSON.parse(authRequest);
-			alert("Press your key");
-			u2f.sign([req], function(res) {
-				ajaxPost("/api/authenticate", res, function(res) {
-					res = JSON.parse(res);
-					if (res.error) {
-						alert(res.error);
-						return;
-					} else {
-						alert(JSON.stringify(res.secretData, true, 5));
-					}
-				});
-			});
-	});
-}
-/* Get a registration request from the server, use it to register the key, send the results back
- * to server and check if it was successful
- */
-function register() {
-	ajaxGet("/api/register_request", function(authRequest) {
-			var req = JSON.parse(authRequest);
-			alert("Press your key");
-			u2f.register([req], [], function(res) {
-				ajaxPost("/api/register", res, function(res) {
-					if (res === "true") {
-						alert("Successfully registered that key. You can now view student data.");
-					} else {
-						alert(res);
-					}
-				});
-			});
-	});
-}
-/* Very basic ajax functions */
-function ajaxGet(url, cb) {
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", url);
-	xhr.onload = function() {
-		cb(xhr.responseText);
-	};
-	xhr.send();
-}
-function ajaxPost(url, data, cb) {
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", url);
-	xhr.setRequestHeader("Content-type", "application/json");
-	xhr.onload = function() {
-		cb(xhr.responseText);
-	};
-	xhr.send(JSON.stringify(data));
-}
-</script>
-</body>
+		<!-- Bootstrap -->
+		<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+		<!-- Bootstrap Material Design -->
+		<link href="bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.css" rel="stylesheet">
+		<link href="bower_components/bootstrap-material-design/dist/css/ripples.min.css" rel="stylesheet">
+
+		<link href="public/css/main.css" rel="stylesheet">
+	</head>
+	<body>
+	<div class="container">
+		<h1>U2F Encrypted File Store</h1>
+
+		<p>Note you'll need a <a href="https://en.wikipedia.org/wiki/Universal_2nd_Factor">U2F key</a> to use this service.</p>
+
+		<div class="row">
+	         <div class="col-md-6">
+	           <div class="well bs-component">
+	             <form class="form-horizontal">
+					 <fieldset>
+					 	<legend>New file</legend>
+					 	<div class="form-group">
+					 		<label for="filename" class="col-md-2 control-label">Filename</label>
+					 		<div class="col-md-10">
+					 		  <input type="text" id="filename" class="form-control">
+					 		</div>
+					 	</div>
+					 	<div class="form-group">
+					 		<label for="password" class="col-md-2 control-label">Password</label>
+					 		<div class="col-md-10">
+					 		   <input type="password" id="encryptPassword" class="form-control">
+					 		</div>
+						</div>
+					 	<div class="form-group">
+					 		<label for="content" class="col-md-2 control-label">Content</label>
+							<div class="col-md-10">
+					 			<textarea id="content" rows="2" class="form-control"></textarea>
+							</div>
+					 	</div>
+						<div class="col-md-10 col-md-offset-2">
+		                  <input type="button" value="Save" onClick="register()" class="btn btn-primary">
+		                </div>
+					 </fieldset>
+ 	             </form>
+ 	           </div>
+			   <div class="well bs-component">
+				 <form class="form-horizontal">
+					 <fieldset>
+					   <legend>Existing files</legend>
+					   <div class="form-group">
+						   <label for="decryptPassword" class="col-md-2 control-label">Password</label>
+						   <div class="col-md-10">
+							  <input type="password" id="decryptPassword" class="form-control">
+						   </div>
+					   </div>
+					   <div class="form-group">
+						   <ul>
+						 	  {{#files}}
+						 	  <li><a href="#" onClick="authenticate('{{.}}')">{{.}}</a></li>
+						 	  {{/files}}
+						   </ul>
+					   </div>
+					 </fieldset>
+
+	         </div>
+		 </div>
+
+
+		 <div id="myModal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+		   <div class="modal-dialog modal-sm">
+		     <div class="modal-content">
+			 	<div class="modal-body">
+
+				</div>
+		     </div>
+		   </div>
+		 </div>
+
+		<script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+		<script src="bower_components/bootstrap-material-design/dist/js/ripples.min.js"></script>
+		<script src="bower_components/bootstrap-material-design/dist/js/material.min.js"></script>
+		<script src="public/js/main.js"></script>
+	</div>
+	</body>
 </html>
